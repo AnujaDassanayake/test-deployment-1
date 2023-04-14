@@ -1,0 +1,82 @@
+﻿Descriptor,Type,Description,Component
+Gen_RPM_Max [rpm],FLOAT,Maximum generator rpm in latest average period,Generator
+Gen_RPM_Min [rpm],FLOAT,Minimum generator rpm in latest average period,Generator
+Gen_RPM_Aug [rpm],FLOAT,Average generator rpm,Generator
+Gen_RPM_Std [rpm],FLOAT,Std. generator rpm in latest average period,Generator
+Gen_Bear_Temp_Avg [°C],INT,Average temperature in generator bearing 1 (Non-Drive End),Generator
+Gen_Phase1_Temp_Avg [°C],INT,Average temperature inside generator in stator windings phase 1,Generator
+Gen_Phase2_Temp_Avg [°C],INT,Average temperature inside generator in stator windings phase 2,Generator
+Gen_Phase3_Temp_Avg [°C],INT,Average temperature inside generator in stator windings phase 3,Generator
+Hyd_oil_Temp_Avg [°C],INT,Average temperature oil in hydraulic group,Hydraulic
+Gear_oil_Temp_Avg [°C],INT,Average temperature oil in gearbox,Gearbox
+Gear_Bear_Temp_Avg [°C],INT,Average temperature in gearbox bearing on high speed shaft,Gearbox
+Nac_Temp_Aug [°C],INT,Average temperature in nacelle,Nacelle
+Rtr_RPM_Max [rpm],FLOAT,Maximum rotor rpm in latest average period,Rotor
+Rtr_RPM_Min [rpm],FLOAT,Minimum rotor rpm in latest average period,Rotor
+Rtr_RPM_Avg_[rpm],FLOAT,Average rotor rpm,Rotor
+Amb_windspeed_Max [m/s],FLOAT,Maximum windspeed within average timebase,Ambient
+Amb_Windspeed_Min [m/s],FLOAT,Minimum windspeed within average timebase,Ambient
+Amb_Windspeed_Aug [m/s],FLOAT,Average windspeed within average timebase,Ambient
+Amb_Windspeed_Std [m/s],FLOAT,Std. windspeed within average timebase,Ambient
+Amb_WindDir_Relative_Aug [°],FLOAT,Average wind relative direction,Ambient
+Amb_WindDir_Abs_Avg[,FLOAT,Average wind absolute direction,Ambient
+Amb_Temp_Avg[oC],INT,Average ambient temperature,Ambient
+Prod_LatestAvg_ActPwrGenO [Wh],INT,Active power generator disconnected (yaw motor hydraulic motor etc.),Production
+Prod_ LatestAug. ActPwrGen1 [Wh],INT,Active power - generator connected in delta,Production
+Prod_ atestAvg_ActPwrGen2 [Wh],INT,Active power generator connected in star,Production
+Prod_ LatestAug. TotActPwr [Wh],INT,Total active power,Production
+Prod_LatestAvg_ReactPwrGenO [VArh],INT,Reactive power generator disconnected (yaw motor hydraulic motor etc.),Production
+Prod_LatestAvg_ReactPwrGent [VArh],INT,Reactive power - generator connected in delta,Production
+Prod_LatestAvg_ReactPwrGen2 [VArh],INT,Reactive power generator connected in star,Production
+Prod_ LatestAug. TotReactPur [VArh],INT,Total reactive power,Production
+HVTrafo_Phase1_Temp_Aus [°C],INT,Average temperature in HV transformer phase L1,Transformer
+HVTrafo_Phase2_Temp_Aug [°C],INT,Average temperature in HV transformer phase L2,Transformer
+HVTrafo_Phase3_Temp_Avg[oC],INT,Average temperature in HV transformer phase L3,Transformer
+Grd_InverterPhase1_Temp_Avg [°C],INT,Average temperature measured by the IGBT-driver on the grid side inverter,Grid
+Cont_Top_Temp_Avg[oC],INT,Average temperature in the top nacelle controller,Controller
+Cont_Hub_Temp_Avg[oC],INT,Average temperature in the hub controller,Controller
+Cont_VCP_Temp_Avg [°C],INT,Average temperature on the VCP-board,Controller
+Gen_SlipRing_Temp_Avg [°C],INT,Average temperature in the split ring chamber,Generator
+Spin_Temp_Aug [°C],INT,Average temperature in the nose cone,Spinner
+Blds_ PitchAngle_ Min [0],FLOAT,Maximum angle in latest average period,Blades
+Blds_ PitchAngle_ Max [°],FLOAT,Minimum angle in latest average period,Blades
+Blds_ PitchAngle_ Aug [°],FLOAT,Average angle,Blades
+Blds_ PitchAngle_ Std [°],FLOAT,Std. angle in latest average period,Blades
+Cont_VCP_ChokcoilTemp_Avg [°C],INT,Average temperature in the choke coils on the VCS-section,Controller
+Grd_RtrinvPhase1_ Temp. Avg [°C],INT,Average temperature measured by the IGBT-driver on the rotor side inverter phase1,Grid
+Grd_RtrinuPhase2_ Temp_ Aug [°C],INT,Average temperature measured by the IGBT-driver on the rotor side inverter phase2,Grid
+Grd_RtrinvPhase3_ Tem _Avg [°C],INT,Average temperature measured by the IGBT-driver on the rotor side inverter phase3,Grid
+Cont_VCP_WtrTemp_Avg [°C],INT,Average temperature in the VCS cooling water,Controller
+Grd_Prod_Pwr_Aug [kW],FLOAT,Power average according to,Grid
+Grd_Prod_CosPhi_Avg,FLOAT,Average actual phase displacement,Grid
+Grd_Prod_Freq_Avg [Hz],FLOAT,Average frequency,Grid
+Grd_ Prod_VoltPhse1_Aug M,FLOAT,Averaged voltage in phase 1,Grid
+Grd_ Prod_VoltPhse2_Aug [],FLOAT,Averaged voltage in phase 2,Grid
+Grd_ Prod_VoltPhse3_Avg M,FLOAT,Averaged voltage in phase 3,Grid
+Grd_ _CurPhse1_Aug [A],FLOAT,Averaged current in phase 1,Grid
+Grd_ _Prod_CurPhse2_Avg [A],FLOAT,Averaged current in phase 2,Grid
+Grd_Prod_CurPhse3_Aug| [A],FLOAT,Averaged current in phase 3,Grid
+Grd_Prod_Pwr_Max [kW],FLOAT,Maximum Power in latest average period,Grid
+Grd_ _Prod_Pwr_Min [kW],FLOAT,Minimum Power in latest average period,Grid
+Grd_ Busbar_ Temp_ [°C],INT,Average temperature in the busbar section,Grid
+Rtr_RPM_Std [rpm],FLOAT,Std. rotor rpm in latest average period,Rotor
+Amb_WindSpeed_Est_Aug [m/s],FLOAT,Average windspeed within average timebase,Ambient
+Grd_Prod_Pwr_Std [kW],FLOAT,Std. power in latest average period,Grid
+Grd_ Prod_ReactPwr_Aug [kVAr],FLOAT,Average grid reactive power,Grid
+Grd_ Prod_ ReactPwr_ Max [kVAr],FLOAT,Maximum grid reactive power,Grid
+Grd_ Prod_ ReactPwr_ Min [kVAr],FLOAT,Minimum grid reactive Power,Grid
+Grd_ Prod_ ReactPwr_ Std [kVAr],FLOAT,Std. Deviation grid reactive power,Grid
+Grd_ Prod_PsblePwr_Av [kW],FLOAT,Average possible grid active power,Grid
+Grd_ Prod_Psblepwr_Max [kW],FLOAT,Maximum possible grid active power,Grid
+Grd_ Prod_PsblePwr_Min [kw],FLOAT,Minimum possible grid active power,Grid
+Grd_ Prod_PsblePwr_Std [kW],FLOAT,Std. possible grid active power,Grid
+Grd_ Prod_Psbleind_ Aug [kVAr],FLOAT,Average possible inductive reactive power,Grid
+Grd_ Prod_ Psblelnd_ Max [kVAr],FLOAT,Maximum possible inductive reactive power,Grid
+Grd_Prod_Psbleind_ Min [kVAr],FLOAT,Minimum possible inductive reactive power,Grid
+Grd_ Prod_Psblelnd_ Std [kVAr],FLOAT,Std. possible inductive reactive power,Grid
+Grd_ Prod_PsbleCap_Avg [kVAr],FLOAT,Average possible capacitive reactive power,Grid
+Grd_ PsbleCap_ Max [kVAr],FLOAT,Maximum possible capacitive reactive power,Grid
+Grd_ Prod_ PsbleCap_ Min [kVAr],FLOAT,Minimum possible capacitive reactive power,Grid
+Grd_ Prod_ PsbleCap_ Std [kVAr],FLOAT,Std. possible capacitive reactive power,Grid
+Gen_Bear2_Temp_Avg [°C],INT,Average temperature in generator bearing 2 (Drive End),Generator
+Nac_Direction_Avg[o],FLOAT,Average nacelle direction,Nacelle
