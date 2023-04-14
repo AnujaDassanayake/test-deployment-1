@@ -5,14 +5,12 @@ import matplotlib.pyplot as plt
 import streamlit as st
 import tensorflow as tf
 import seaborn as sns
-import datetime
 import time
 import os
-import calplot
+# import calplot
 import plotly.express as px
 import numpy
 import time
-import streamlit as st
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from windrose import WindroseAxes
@@ -226,15 +224,12 @@ with tab1:
         st.warning("""
         # Please Enter SCADA data to proceed!
         """)
-
-
         
-
-
 with tab2:
 
     st.write("""
     # Identified Anomalies
+    
     """)
    
     if uploaded_dataframe is not None:
