@@ -275,6 +275,7 @@ with tab2:
                     ]
                     
                 eval_df = calculate_error_matrices(dataset ,model1 ,target_col, features2rem)
+                eval_df
 
                 model_path = 'EDP/daily_anomaly_detector.pickle'
                 test_metrics_copy_all = anomaly_detection(model_path, eval_df)
