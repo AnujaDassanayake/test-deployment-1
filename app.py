@@ -287,7 +287,7 @@ with tab2:
                 test_metrics_copy_all
                 .query('status_text == "anomaly"')
                 )
-
+                uploaded_dataframe[component]
                 data_for_cal_plot = analomaly_dates[['status_text']]
                 data_for_cal_plot
                 # calplot.yearplot(data_for_cal_plot['status'])
