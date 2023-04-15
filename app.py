@@ -274,20 +274,11 @@ with tab2:
                     'Gen_SlipRing_Temp_Avg'
                     ]
                     
-                folder_path = 'evaluation_data/'
-
-                calculate_error_matrices(dataset ,model1 ,target_col, features2rem, folder_path)
+                eval_df = calculate_error_matrices(dataset ,model1 ,target_col, features2rem)
 
                 model_path = 'EDP/daily_anomaly_detector.pickle'
-                eval_path = 'evaluation_data/evaluation.csv'
-                folder_path = 'anomaly_data/anomalies.csv'
-
-
-                test_metrics_copy_all = anomaly_detection(model_path, eval_path, folder_path)
-
-
+                test_metrics_copy_all = anomaly_detection(model_path, eval_df)
                 # st.line_chart(dataset.Amb_WindSpeed_Est_Avg)
-
                 test_metrics_copy_all['date'] = pd.to_datetime(test_metrics_copy_all['date'])
                 test_metrics_copy_all.set_index('date',inplace = True)
 

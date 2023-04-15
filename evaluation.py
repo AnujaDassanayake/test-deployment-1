@@ -1,6 +1,8 @@
 import os
 import pandas as pd
 import tensorflow as tf
+from datetime import datetime, timedelta
+
 
 
 
@@ -57,12 +59,10 @@ def evaluate_model(model, X_test, y_test, time_period):
   return {'Time_Period':time_period, 'rows':row_count, 'MAE':mae_out, 'MSE':mse_out ,'RMSE':rmse_out, 'MAPE':mape_out, 'R2':r2_out}
 
 
-def calculate_error_matrices( dataset, model,target_col, features_to_remove, folder_path):
+def calculate_error_matrices( dataset, model,target_col, features_to_remove):
   """
   This function creates evaluation df
   """
-  # import datetime module
-  from datetime import datetime, timedelta
 
   start_date = str(dataset.index.min().date())
   print('start date ' + start_date)
@@ -73,7 +73,7 @@ def calculate_error_matrices( dataset, model,target_col, features_to_remove, fol
   current_date = datetime.strptime(start_date, '%Y-%m-%d')
   last_date = datetime.strptime(end_date, '%Y-%m-%d')
   current_date_plus_lag = current_date + timedelta(days=(lag-1))  
-  df = pd.DataFrame(columns=['Time_Period','rows','MAE','MSE','RMSE','MAPE','R2'])
+  eval_data = pd.DataFrame(columns=['Time_Period','rows','MAE','MSE','RMSE','MAPE','R2'])
   i=0
   while current_date < last_date:
     window_start_date = str(current_date.date())
@@ -86,16 +86,11 @@ def calculate_error_matrices( dataset, model,target_col, features_to_remove, fol
     #status good when number of records for the test window is > 0
     if status == 'good':
       #adding row with evaluation metrices to the dataframe
-      df.loc[i] = pd.Series(evaluate_model(model,X_test1,y_test1,time))
+      eval_data.loc[i] = pd.Series(evaluate_model(model,X_test1,y_test1,time))
     #moving to the next timestep
     current_date_plus_lag = current_date_plus_lag + timedelta(days=lag)  
     current_date = current_date + timedelta(days=lag) 
     i+=1
-
-    df['completeness'] = df['rows']/expected_recs
-    file_name = 'evaluation.csv'
-    save_path = os.path.join(folder_path, file_name)    
-    with open(save_path, 'w', encoding = 'utf-8-sig') as f:
-      df.to_csv(f)    
-
-
+    eval_data['completeness'] = eval_data['rows']/expected_recs
+    
+    return eval_data
