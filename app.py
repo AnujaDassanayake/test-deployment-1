@@ -15,6 +15,8 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from windrose import WindroseAxes
 from datetime import date
+from datetime import timedelta
+
 
 
 
@@ -25,7 +27,7 @@ from evaluation import (
 )
 
 from anomaly_detection import (
-  anomaly_detection
+  anomaly_detection_daily
 )
 
 st.set_page_config(layout='wide')
@@ -95,72 +97,158 @@ with tab1:
         #Extracting Year and Month from the original timestamp
         uploaded_dataframe['Year'] = uploaded_dataframe['Timestamp'].dt.year
         uploaded_dataframe['Month'] = uploaded_dataframe['Timestamp'].dt.month
-
-        #Calculating the average power production for each year-month present in the dataset
-        monthly_production_farm = (
-            uploaded_dataframe
-            .groupby(['Year','Month'], as_index=False)
-            .agg(
-                Average_production = ('Grd_Prod_Pwr_Avg','mean')
-            )       
-        )      
-
-        #Ploting the average monthly production in the full wind farm as a bar chart
-        fig = go.Figure(
-            go.Bar(
-            name = 'Power Production', 
-            x = monthly_production_farm['Month'], 
-            y = monthly_production_farm['Average_production']
-            ),
-        )
-
-        fig.update_layout(
-                title = dict(text = 'Average Power Production of all turbines'),
-                xaxis_title="Month",
-                yaxis_title="Avg Power Produced (KWh)"
-            )  
         
-        fig.update_traces(
-                        marker = dict(
-                        color = monthly_production_farm['Average_production'],
-                        colorscale = 'aggrnyl'
-                        )
-        )          
+
+        col_avg_power_farm, col_avg_power_turbine = st.columns(2)
         
-        st.plotly_chart(fig, use_container_width=True)
+        with col_avg_power_farm:
 
-        #Ploting the average monthly production of each turbine in the farm
-        fig = go.Figure()   
-
-        for turbine in available_turbines:
-            uploaded_dataframe_filtered = uploaded_dataframe.loc[uploaded_dataframe['Turbine_ID'] == turbine]
-            monthly_production_select = (
-                uploaded_dataframe_filtered
+            #Calculating the average power production for each year-month present in the dataset
+            monthly_production_farm = (
+                uploaded_dataframe
                 .groupby(['Year','Month'], as_index=False)
                 .agg(
                     Average_production = ('Grd_Prod_Pwr_Avg','mean')
-                )   
-            )
-            fig.add_trace(
+                )       
+            )      
+
+            #Ploting the average monthly production in the full wind farm as a bar chart
+            fig = go.Figure(
                 go.Bar(
-                x = monthly_production_select['Month'], 
-                y = monthly_production_select['Average_production'],
-                name = turbine,
-                marker = dict(
+                name = 'Power Production', 
+                x = monthly_production_farm['Month'], 
+                y = monthly_production_farm['Average_production']
+                ),
+            )
+
+            fig.update_layout(
+                    title = dict(text = 'Average Power Production of all turbines'),
+                    xaxis_title="Month",
+                    yaxis_title="Avg Power Produced (KWh)"
+                )  
+            
+            fig.update_traces(
+                            marker = dict(
                             color = monthly_production_farm['Average_production'],
                             colorscale = 'aggrnyl'
                             )
+            )          
+            
+            st.plotly_chart(fig, use_container_width=True)
+
+        with col_avg_power_turbine:
+
+            #Ploting the average monthly production of each turbine in the farm
+            fig = go.Figure()   
+
+            for turbine in available_turbines:
+                uploaded_dataframe_filtered = uploaded_dataframe.loc[uploaded_dataframe['Turbine_ID'] == turbine]
+                monthly_uptime_select = (
+                    uploaded_dataframe_filtered
+                    .groupby(['Year','Month'], as_index=False)
+                    .agg(
+                        Average_production = ('Grd_Prod_Pwr_Avg','mean')
+                    )   
                 )
+                fig.add_trace(
+                    go.Bar(
+                    x = monthly_uptime_select['Month'], 
+                    y = monthly_uptime_select['Average_production'],
+                    name = turbine,
+                    marker = dict(
+                                color = monthly_production_farm['Average_production'],
+                                colorscale = 'aggrnyl'
+                                )
+                    )
 
+                )
+                fig.update_layout(
+                        title = dict(text = 'Average Power Production'),
+                        xaxis_title = 'Months',
+                        yaxis_title="Avg Power Produced (KWh)",
+                        barmode ='group'
+                    )        
+            st.plotly_chart(fig, use_container_width=True)
+
+        col_total_productive_hours_farm, col_total_productive_hours_turbine = st.columns(2)
+
+        with col_total_productive_hours_farm:
+
+            monthly_uptime = (
+                uploaded_dataframe
+                .query('Grd_Prod_Pwr_Avg > 0')
+                .groupby(['Year','Month'], as_index=False)
+                .agg(
+                    Productive_time = ('Grd_Prod_Pwr_Avg','count')
+                )
             )
-            fig.update_layout(
-                    title = dict(text = 'Average Power Production'),
-                    xaxis_title = 'Months',
-                    yaxis_title="Avg Power Produced (KWh)",
-                    barmode ='group'
-                )        
-        st.plotly_chart(fig, use_container_width=True)
+            monthly_uptime['Productive_time'] = monthly_uptime['Productive_time']/6
+            #Ploting the total uptime in the full wind farm as a bar chart
+            fig = go.Figure(
+                go.Bar(
+                name = 'Productive Hours', 
+                x = monthly_uptime['Month'], 
+                y = monthly_uptime['Productive_time']
+                ),
+            )
 
+            fig.update_layout(
+                    title = dict(text = 'Total Productive time of all turbines'),
+                    xaxis_title="Month",
+                    yaxis_title="Total Productive Hours"
+                )  
+            
+            fig.update_traces(
+                            marker = dict(
+                            color = monthly_uptime['Productive_time'],
+                            colorscale = 'aggrnyl'
+                            )
+            )          
+
+            fig.add_hline(
+                y=2880,
+                annotation_text='Maximum Productive Hours for 30 Days'
+                )
+            
+            st.plotly_chart(fig, use_container_width=True)    
+        
+        with col_total_productive_hours_turbine:
+            
+            fig = go.Figure()
+
+            for turbine in available_turbines:
+                uploaded_dataframe_filtered = uploaded_dataframe.loc[uploaded_dataframe['Turbine_ID'] == turbine]
+                monthly_uptime_select = (
+                    uploaded_dataframe_filtered
+                    .query('Grd_Prod_Pwr_Avg > 0')
+                    .groupby(['Year','Month'], as_index=False)
+                    .agg(
+                        Productive_time = ('Grd_Prod_Pwr_Avg','count')
+                    )   
+                )
+                monthly_uptime_select['Productive_time'] = monthly_uptime_select['Productive_time']/6
+                fig.add_trace(
+                    go.Bar(
+                    x = monthly_uptime_select['Month'], 
+                    y = monthly_uptime_select['Productive_time'],
+                    name = turbine,
+                    marker = dict(
+                                color = monthly_uptime['Productive_time'],
+                                colorscale = 'aggrnyl'
+                                )
+                    )
+
+                )
+                fig.update_layout(
+                        title = dict(text = 'Total Productive time'),
+                        xaxis_title = 'Months',
+                        yaxis_title="Total Productive Hours",
+                        barmode ='group'
+                    )     
+                
+            st.plotly_chart(fig, use_container_width=True)    
+            
+        monthly_uptime['Productive_Hours'] = monthly_uptime['Productive_time']/10
         
         st.write('### Windrose plot for the wind farm')
 
@@ -199,26 +287,19 @@ with tab1:
             plt.savefig('windrose.jpg')
             st.image('windrose.jpg')
 
-        
-        st.write("### Start-End dates")
-        
-        uploaded_dataframe['Dates'] = uploaded_dataframe['Timestamp'].dt.date
-
         start_end = (
             uploaded_dataframe
         .groupby('Turbine_ID')
         .agg(
             Start_Date = ('Timestamp', 'min'), 
             End_Date = ('Timestamp', 'max'),
-            Number_of_Days = ('Dates', 'nunique')
+            Number_of_Days = ('Date', 'nunique')
             )
             )
 
         start_end['Start_Date'] = start_end['Start_Date'].dt.date
         start_end['End_Date'] = start_end['End_Date'].dt.date
-        st.write(start_end) 
 
-        uploaded_dataframe
         
     else:
         st.warning("""
@@ -242,9 +323,9 @@ with tab2:
 
             component = st.selectbox(
                 'Select component',
-                components
+                ['Gen_Bear2_Temp_Avg']
                 )
-            if (turbine == "T07") & (component == "Gen_Bear2_Temp_Avg"):
+            if (component == "Gen_Bear2_Temp_Avg"):
                 #Chaning data type of the timestamp column
                 uploaded_dataframe_anomaly['Timestamp'] = pd.to_datetime(uploaded_dataframe_anomaly['Timestamp'])
                 uploaded_dataframe_anomaly.set_index('Timestamp',inplace = True)
@@ -274,11 +355,10 @@ with tab2:
                     'Gen_SlipRing_Temp_Avg'
                     ]
                     
-                eval_df = calculate_error_matrices(dataset ,model1 ,target_col, features2rem)
-                eval_df
+                eval_df = calculate_error_matrices(dataset ,model1 ,target_col, features2rem, 7)
 
-                model_path = 'EDP/daily_anomaly_detector.pickle'
-                test_metrics_copy_all = anomaly_detection(model_path, eval_df)
+                model_path = 'EDP/weekly_anomaly_detector.pickle'
+                test_metrics_copy_all = anomaly_detection_daily(model_path, eval_df)
                 # st.line_chart(dataset.Amb_WindSpeed_Est_Avg)
                 test_metrics_copy_all['date'] = pd.to_datetime(test_metrics_copy_all['date'])
                 test_metrics_copy_all.set_index('date',inplace = True)
@@ -287,9 +367,29 @@ with tab2:
                 test_metrics_copy_all
                 .query('status_text == "anomaly"')
                 )
-                uploaded_dataframe[component]
-                data_for_cal_plot = analomaly_dates[['status_text']]
-                data_for_cal_plot
+                analomaly_dates['week_number'] = analomaly_dates.index.isocalendar().week
+                analomaly_dates['week_number'] = analomaly_dates['week_number'] + 1
+                analomaly_dates = analomaly_dates[['status_text','week_number']]
+                analomaly_dates['Start_Date'] = analomaly_dates.index.date
+                analomaly_dates['End_Date'] = analomaly_dates['Start_Date'] + timedelta(days=6)
+            
+                plot_data = selected_turbine_scada_data[['Gen_Bear2_Temp_Avg']]
+                plot_data['week_number'] = plot_data.index.isocalendar().week
+                plot_data['datetime'] = plot_data.index
+
+                plot_data_join = pd.merge(plot_data, analomaly_dates, how='left', on='week_number')
+                plot_data_join['status_text'].fillna('normal', inplace=True)
+                plot_data_join.set_index('datetime', inplace=True)
+                
+                fig = px.line(plot_data_join, x=plot_data_join.index , y=['Gen_Bear2_Temp_Avg'], color='status_text', title='Bearing Temp')
+                st.plotly_chart(fig, use_container_width=True)
+                analomaly_dates.rename(columns={'status_text':'Health_Status'}, inplace=True)
+                display_anomaly_data = (
+                    analomaly_dates
+                    .filter(['Start_Date','End_Date','Health_Status'])
+                    .reset_index(drop=True)
+                    )
+                st.write(display_anomaly_data)
                 # calplot.yearplot(data_for_cal_plot['status'])
             else:
                 st.warning("""
@@ -316,7 +416,7 @@ with tab2:
     
 with tab3:
     st.write("""
-    # Variable description
+    # Upload Format and Variable descirption
     """)
     
     varible_desc_path = 'EDP/variables.csv'

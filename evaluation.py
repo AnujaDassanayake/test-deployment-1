@@ -59,7 +59,7 @@ def evaluate_model(model, X_test, y_test, time_period):
   return {'Time_Period':time_period, 'rows':row_count, 'MAE':mae_out, 'MSE':mse_out ,'RMSE':rmse_out, 'MAPE':mape_out, 'R2':r2_out}
 
 
-def calculate_error_matrices( dataset, model,target_col, features_to_remove):
+def calculate_error_matrices( dataset, model,target_col, features_to_remove, lag):
   """
   This function creates evaluation df
   """
@@ -68,7 +68,6 @@ def calculate_error_matrices( dataset, model,target_col, features_to_remove):
   print('start date ' + start_date)
   end_date = str(dataset.index.max().date())
   print('end date ' + end_date)
-  lag = 1 #creates daily windows
   expected_recs = 6*24*lag #number of expected records per day
   current_date = datetime.strptime(start_date, '%Y-%m-%d')
   last_date = datetime.strptime(end_date, '%Y-%m-%d')

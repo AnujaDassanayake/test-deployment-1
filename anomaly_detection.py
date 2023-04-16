@@ -1,7 +1,7 @@
 import pickle
 import pandas as pd
 
-def anomaly_detection(model_path, test_metrics):
+def anomaly_detection_daily(model_path, test_metrics):
     
     pick_read = open(model_path,'rb')
     anomaly_detector_model = pickle.load(pick_read)
