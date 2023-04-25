@@ -30,6 +30,10 @@ from anomaly_detection import (
   anomaly_detection_daily
 )
 
+from anomaly_graph_fn import(
+    anomaly_graph
+)
+
 st.set_page_config(layout='wide')
 st.write("""
     # Wind Turbine Anomaly Detector
@@ -60,6 +64,7 @@ with tab1:
         #reading the uploaded CSV
         uploaded_dataframe = pd.read_csv(uploaded_file, sep=';')
         uploaded_dataframe['Timestamp'] = pd.to_datetime(uploaded_dataframe['Timestamp'])
+        uploaded_dataframe = uploaded_dataframe[uploaded_dataframe['Timestamp']>='2017-05-01T00:00:00+00:00']
         uploaded_dataframe_anomaly = uploaded_dataframe.copy()
         uploaded_dataframe['Date'] = uploaded_dataframe['Timestamp'].dt.date
 
@@ -316,34 +321,11 @@ with tab2:
     if uploaded_dataframe is not None:
         with st.spinner('Anomaly detection model pipeline executing'):
             time.sleep(5)
-            turbine = st.selectbox(
-                'Select Turbine ID',
-                available_turbines
-                )
 
-            component = st.selectbox(
-                'Select component',
-                ['Gen_Bear2_Temp_Avg']
-                )
-            if (component == "Gen_Bear2_Temp_Avg"):
-                #Chaning data type of the timestamp column
-                uploaded_dataframe_anomaly['Timestamp'] = pd.to_datetime(uploaded_dataframe_anomaly['Timestamp'])
-                uploaded_dataframe_anomaly.set_index('Timestamp',inplace = True)
-                selected_turbine_scada_data = uploaded_dataframe_anomaly[uploaded_dataframe_anomaly['Turbine_ID'] == turbine]
-                selected_turbine_scada_data = selected_turbine_scada_data.sort_values(by = ['Timestamp'], ascending = True)
-                selected_turbine_scada_data.dropna(inplace=True)
-                #len(selected_turbine_scada_data)
-
-                dataset = selected_turbine_scada_data
-
-                pick_read = open("EDP/20230322_t07_Gen_Bear2_Temp_Avg_v1.pickle",'rb')
-                model1 = pickle.load(pick_read)
-                pick_read.close()
-
-                # target_col = 'Gen_Bear2_Temp_Avg'
-                target_col = component
-
-                features2rem= [
+            turbine = 'T07'
+            regression_model_gb2 = "EDP/20230424_t07_Gen_Bear2_Temp_Avg_v1_rf.pickle"
+            target_col_gb2 = 'Gen_Bear2_Temp_Avg'
+            features_to_remove_gb2 = [
                     'Turbine_ID',
                     'HVTrafo_Phase1_Temp_Avg',
                     'HVTrafo_Phase2_Temp_Avg',
@@ -354,49 +336,59 @@ with tab2:
                     'Gen_Bear_Temp_Avg',
                     'Gen_SlipRing_Temp_Avg'
                     ]
-                    
-                eval_df = calculate_error_matrices(dataset ,model1 ,target_col, features2rem, 7)
+            ocsvm_mdl_gb2 = 'EDP/weekly_anomaly_detector_rf.pickle'
+            component_gb2 = 'Generator Bearing Temperature - Drive End'
 
-                model_path = 'EDP/weekly_anomaly_detector.pickle'
-                test_metrics_copy_all = anomaly_detection_daily(model_path, eval_df)
-                # st.line_chart(dataset.Amb_WindSpeed_Est_Avg)
-                test_metrics_copy_all['date'] = pd.to_datetime(test_metrics_copy_all['date'])
-                test_metrics_copy_all.set_index('date',inplace = True)
+            identified_anomalies_gb2, fig_gb2, metric_gb2 = anomaly_graph(uploaded_dataframe_anomaly, regression_model_gb2, turbine, target_col_gb2, features_to_remove_gb2, ocsvm_mdl_gb2, component_gb2)
 
-                analomaly_dates = (
-                test_metrics_copy_all
-                .query('status_text == "anomaly"')
-                )
-                analomaly_dates['week_number'] = analomaly_dates.index.isocalendar().week
-                analomaly_dates['week_number'] = analomaly_dates['week_number'] + 1
-                analomaly_dates = analomaly_dates[['status_text','week_number']]
-                analomaly_dates['Start_Date'] = analomaly_dates.index.date
-                analomaly_dates['End_Date'] = analomaly_dates['Start_Date'] + timedelta(days=6)
-            
-                plot_data = selected_turbine_scada_data[['Gen_Bear2_Temp_Avg']]
-                plot_data['week_number'] = plot_data.index.isocalendar().week
-                plot_data['datetime'] = plot_data.index
+            regression_model_gb1 = 'EDP/20230424_t07_Gen_Bear1_Temp_Avg_v1.pickle'
+            target_col_gb1 = 'Gen_Bear_Temp_Avg'
+            features_to_remove_gb1 = [
+                    'Turbine_ID',
+                    'HVTrafo_Phase1_Temp_Avg',
+                    'HVTrafo_Phase2_Temp_Avg',
+                    'HVTrafo_Phase3_Temp_Avg',
+                    'Gen_Phase1_Temp_Avg',
+                    'Gen_Phase2_Temp_Avg',
+                    'Gen_Phase3_Temp_Avg',
+                    'Gen_Bear2_Temp_Avg',
+                    'Gen_SlipRing_Temp_Avg'
+                    ]
+            ocsvm_mdl_gb1 = 'EDP/Gen_Bear_Temp_Avg_ocsvm_weekly.pickle'
+            component_gb1 = 'Generator Bearing Temperature - Non-Drive End'
+            identified_anomalies_gb1, fig_gb1, metric_gb1 = anomaly_graph(uploaded_dataframe_anomaly, regression_model_gb1, turbine, target_col_gb1, features_to_remove_gb1, ocsvm_mdl_gb1, component_gb1)
 
-                plot_data_join = pd.merge(plot_data, analomaly_dates, how='left', on='week_number')
-                plot_data_join['status_text'].fillna('normal', inplace=True)
-                plot_data_join.set_index('datetime', inplace=True)
-                
-                fig = px.line(plot_data_join, x=plot_data_join.index , y=['Gen_Bear2_Temp_Avg'], color='status_text', title='Bearing Temp')
-                st.plotly_chart(fig, use_container_width=True)
-                analomaly_dates.rename(columns={'status_text':'Health_Status'}, inplace=True)
-                display_anomaly_data = (
-                    analomaly_dates
-                    .filter(['Start_Date','End_Date','Health_Status'])
-                    .reset_index(drop=True)
-                    )
-                st.write(display_anomaly_data)
-                # calplot.yearplot(data_for_cal_plot['status'])
-            else:
-                st.warning("""
-                Anomaly detector model is unavailable for the selected turbine + componenet combination 
-                """)
+            #Populating graph for Gearbox
+            regression_model_gearbox_oil_temp = "EDP/20230424_t07_Gear_oil_Temp_Avg_v1.pickle"
+            target_col_gearbox_oil_temp = 'Gear_Oil_Temp_Avg'
+            features_to_remove_gearbox_oil_temp = [
+                    'Turbine_ID',
+                    'Gear_Bear_Temp_Avg'
+                    ]
+            ocsvm_mdl_gearbox_oil_temp = 'EDP/gearbox_ocsvm_weekly.pickle'
+            component_gearbox_oil_temp = 'Gearbox Oil Temperature'    
+            identified_anomalies_gbox, fig_gbox , metric_gbox= anomaly_graph(uploaded_dataframe_anomaly, regression_model_gearbox_oil_temp, turbine, target_col_gearbox_oil_temp, features_to_remove_gearbox_oil_temp, ocsvm_mdl_gearbox_oil_temp, component_gearbox_oil_temp)
+
+            # Create three columns with equal width
+            col1, col2, col3 = st.columns(3)
+
+            # Add content to the first column
+            with col1:
+                st.metric(label=component_gb1, value=metric_gb1[0])
+
+            # Add content to the second column
+            with col2:
+                st.metric(label=component_gb2, value=metric_gb2[0])
+
+            # Add content to the third column
+            with col3:
+                st.metric(label=component_gearbox_oil_temp, value=metric_gbox[0])
+
+            st.plotly_chart(fig_gb1, use_container_width=True)
+            st.plotly_chart(fig_gb2, use_container_width=True)
+            st.plotly_chart(fig_gbox, use_container_width=True)
+
         st.success('Done!')
-
 
 # with tab3:
 
@@ -432,7 +424,20 @@ css = '''
     .stTabs [data-baseweb="tab-list"] button [data-testid="stMarkdownContainer"] p {
     font-size:2rem;
     }
+    /*center metric label*/
+    [data-testid="stMetricLabel"] > div:nth-child(1) {
+        justify-content: center;
+    }
+
+    /*center metric value*/
+    [data-testid="stMetricValue"] > div:nth-child(1) {
+        justify-content: center;
+    }
 </style>
 '''
+st.markdown('''
+
+''', unsafe_allow_html=True)
+
 
 st.markdown(css, unsafe_allow_html=True)
